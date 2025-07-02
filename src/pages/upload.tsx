@@ -7,7 +7,90 @@ import "../styles/uploadPage.css";
 import Tesseract from "tesseract.js";
 import * as pdfjsLib from "pdfjs-dist";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
+
+function preprocessText(text: string): string {
+  return text
+    .replace(/[^\w\sáéíóúãõâêîôûàèìòùçÁÉÍÓÚÃÕÂÊÎÔÛÀÈÌÒÙÇ]/gi, "")
+    .replace(/\s+/g, " ")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
+function extrairNomeInteligente(texto: string): string {
+  const linhas = texto
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  for (let i = 0; i < linhas.length; i++) {
+    if (
+      /PROPRIET[ÁA]RIO|CONTRIBUINTE|NOME|EMPRESA|TITULAR/i.test(linhas[i]) &&
+      linhas[i + 1]
+    ) {
+      return linhas[i + 1].trim();
+    }
+  }
+
+  const nomeLinha = linhas.find(
+    (l) => /^[A-ZÀ-Ý'\-\s]{5,}$/.test(l) && l.split(" ").length > 1
+  );
+  if (nomeLinha) return nomeLinha.trim();
+
+  for (let i = 1; i < linhas.length - 1; i++) {
+    if (
+      /VE[IÍ]CULO/i.test(linhas[i - 1]) &&
+      /INFRA[CÇ][AÃ]O/i.test(linhas[i + 1])
+    ) {
+      return linhas[i].trim();
+    }
+  }
+
+  const possivelNome = linhas.find(
+    (l) =>
+      /^[A-ZÀ-Ý'\-\s]{5,}$/.test(l) &&
+      l.split(" ").length > 1 &&
+      !/\d/.test(l) &&
+      !/(PREFEITURA|SECRETARIA|NOTIFICAÇÃO|MENSAGEM|INFORMAÇÕES|DEFESA|AUTUAÇÃO|LOCAL|DATA|HORA|PLACA|CÓDIGO|ARTIGO|VALOR|PONTOS|OBSERVAÇÃO|CONDUTOR|IDENTIFICADO|NÃO|ATO|INFRAÇÃO|VEÍCULO|CATEGORIA|ESPÉCIE|PROPRIETÁRIO|PASSAGEIRO|EMISSÃO|Nº|ART|INCISO|MÉDIA|GRAVE|LEVE|GRAVÍSSIMA)/i.test(
+        l
+      )
+  );
+  if (possivelNome) return possivelNome.trim();
+
+  return "";
+}
+
+function extrairInfo(texto: string) {
+  const regexCNPJ = /\b\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-\s]?\d{2}\b/g;
+
+  const regexAIT = /N[º°]?\s*AIT[:\s-]*([A-Z0-9-]+)/i;
+  const regexRENAINF = /NUM[.\s]*RENAINF[:\s-]*([A-Z0-9-]+)/i;
+  const regexNumerosLongos = /\b\d{8,}\b/g;
+
+  let numeroAIT = "";
+  let numeroRENAINF = "";
+  let outrosNumeros = [];
+
+  const aitMatch = texto.match(regexAIT);
+  if (aitMatch && aitMatch[1]) numeroAIT = aitMatch[1];
+
+  const renainfMatch = texto.match(regexRENAINF);
+  if (renainfMatch && renainfMatch[1]) numeroRENAINF = renainfMatch[1];
+
+  outrosNumeros = texto.match(regexNumerosLongos) || [];
+
+  const nome = extrairNomeInteligente(texto);
+
+  const cnpjs = texto.match(regexCNPJ) || [];
+
+  return {
+    numeroAIT,
+    numeroRENAINF,
+    outrosNumeros,
+    nome,
+    cnpjs,
+  };
+}
 
 export default function HunterFiscal() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -60,7 +143,7 @@ export default function HunterFiscal() {
             fullText += `\n--- Página ${pageNum} ---\n` + text;
           }
         }
-        setOcrText(fullText);
+        setOcrText(preprocessText(fullText));
         setOcrProgress(100);
       } catch (err) {
         setOcrText("Erro ao processar PDF: " + err);
@@ -80,7 +163,7 @@ export default function HunterFiscal() {
           }
         },
       });
-      setOcrText((prev) => (prev ? prev + "\n" + text : text));
+      setOcrText((prev) => preprocessText(prev ? prev + "\n" + text : text));
       return text;
     } catch (err) {
       setOcrText("Erro no OCR: " + err);
@@ -93,6 +176,8 @@ export default function HunterFiscal() {
       document.getElementById("file-upload")?.click();
     }
   };
+
+  const infoExtraida = extrairInfo(ocrText);
 
   return (
     <div className="upload-full-bg">
@@ -147,6 +232,29 @@ export default function HunterFiscal() {
             >
               <strong>Texto reconhecido:</strong>
               <pre style={{ whiteSpace: "pre-wrap" }}>{ocrText}</pre>
+              <div style={{ marginTop: "1rem", color: "#f97316" }}>
+                <strong>Extração automática:</strong>
+                <div>Nº AIT: {infoExtraida.numeroAIT || "Não encontrado"}</div>
+                <div>
+                  NUM. RENAINF: {infoExtraida.numeroRENAINF || "Não encontrado"}
+                </div>
+                <div>
+                  Outros números longos:{" "}
+                  {infoExtraida.outrosNumeros.length > 0
+                    ? infoExtraida.outrosNumeros.join(", ")
+                    : "Não encontrado"}
+                </div>
+                <div>
+                  Nome do proprietário/contribuinte:{" "}
+                  {infoExtraida.nome || "Não encontrado"}
+                </div>
+                <div>
+                  CNPJ(s):{" "}
+                  {infoExtraida.cnpjs.length > 0
+                    ? infoExtraida.cnpjs.join(", ")
+                    : "Não encontrado"}
+                </div>
+              </div>
             </div>
           )}
         </div>
