@@ -1,0 +1,15 @@
+.buttonGeneric {
+  background: #f9500d;
+  color: #fff;
+  font-weight: 500;
+  padding: 1rem 0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+.buttonGeneric:hover {
+  background: #ea580c;
+}
