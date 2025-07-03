@@ -1,0 +1,353 @@
+/* Reset e configurações básicas */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+}
+
+/* Container principal */
+.container {
+  min-height: 100vh;
+  min-width: 100vw;
+  background-color: #000000;
+  color: #ffffff;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Padrão de fundo */
+.background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.1;
+  background: radial-gradient(
+      circle at 25% 25%,
+      rgba(255, 165, 0, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(255, 165, 0, 0.1) 0%,
+      transparent 50%
+    );
+}
+
+/* Conteúdo principal */
+.content {
+  position: relative;
+  z-index: 10;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 2rem 2vw;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 1.125rem;
+}
+
+/* Botão voltar */
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  border: 2px solid #ff8c00;
+  color: #ff8c00;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: auto;
+  max-width: 300px;
+  min-width: 0;
+  margin-left: 0;
+  margin-right: auto;
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.05);
+}
+
+.back-button:hover {
+  background-color: #ff8c00;
+  color: #000000;
+  outline: none;
+}
+
+@media (max-width: 600px) {
+  .back-button {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Conteúdo principal */
+.main-content {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Cards */
+.card {
+  background-color: rgba(17, 24, 39, 0.8);
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 2rem 2vw;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Informações do arquivo */
+.file-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.file-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.file-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.file-date {
+  color: #9ca3af;
+  margin: 0.25rem 0 0 0;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #eab308;
+  color: #eab308;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: rgba(234, 179, 8, 0.1);
+}
+
+/* Grupos de botões */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Botões */
+.primary-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #ff8c00;
+  color: #000000;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+  background-color: #e07600;
+}
+
+.secondary-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  color: #d1d5db;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+  background-color: rgba(75, 85, 99, 0.3);
+}
+
+/* Seção de detalhes */
+.details-section {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.details-section.show {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Títulos de seção */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ff8c00;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Grids */
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.grid-three {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+/* Campos */
+.field {
+  margin-bottom: 1rem;
+}
+
+.field-label {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.field-value {
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field-value.mono {
+  font-family: "Courier New", monospace;
+}
+
+.field-value.bold {
+  font-weight: 600;
+}
+
+.field-value.total {
+  color: #ff8c00;
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+
+/* Separador */
+.separator {
+  height: 1px;
+  background-color: #374151;
+  margin: 1rem 0;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 3rem;
+  color: #6b7280;
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+  .content,
+  .card {
+    padding-left: 1vw;
+    padding-right: 1vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .file-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .grid-two,
+  .grid-three {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
