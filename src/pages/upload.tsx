@@ -1,95 +1,14 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import "../styles/uploadPage.css";
-import Tesseract from "tesseract.js";
-import * as pdfjsLib from "pdfjs-dist";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
-
-function preprocessText(text: string): string {
-  return text
-    .replace(/[^\w\sáéíóúãõâêîôûàèìòùçÁÉÍÓÚÃÕÂÊÎÔÛÀÈÌÒÙÇ]/gi, "")
-    .replace(/\s+/g, " ")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
-}
-
-function extrairNomeInteligente(texto: string): string {
-  const linhas = texto
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  for (let i = 0; i < linhas.length; i++) {
-    if (
-      /PROPRIET[ÁA]RIO|CONTRIBUINTE|NOME|EMPRESA|TITULAR/i.test(linhas[i]) &&
-      linhas[i + 1]
-    ) {
-      return linhas[i + 1].trim();
-    }
-  }
-
-  const nomeLinha = linhas.find(
-    (l) => /^[A-ZÀ-Ý'\-\s]{5,}$/.test(l) && l.split(" ").length > 1
-  );
-  if (nomeLinha) return nomeLinha.trim();
-
-  for (let i = 1; i < linhas.length - 1; i++) {
-    if (
-      /VE[IÍ]CULO/i.test(linhas[i - 1]) &&
-      /INFRA[CÇ][AÃ]O/i.test(linhas[i + 1])
-    ) {
-      return linhas[i].trim();
-    }
-  }
-
-  const possivelNome = linhas.find(
-    (l) =>
-      /^[A-ZÀ-Ý'\-\s]{5,}$/.test(l) &&
-      l.split(" ").length > 1 &&
-      !/\d/.test(l) &&
-      !/(PREFEITURA|SECRETARIA|NOTIFICAÇÃO|MENSAGEM|INFORMAÇÕES|DEFESA|AUTUAÇÃO|LOCAL|DATA|HORA|PLACA|CÓDIGO|ARTIGO|VALOR|PONTOS|OBSERVAÇÃO|CONDUTOR|IDENTIFICADO|NÃO|ATO|INFRAÇÃO|VEÍCULO|CATEGORIA|ESPÉCIE|PROPRIETÁRIO|PASSAGEIRO|EMISSÃO|Nº|ART|INCISO|MÉDIA|GRAVE|LEVE|GRAVÍSSIMA)/i.test(
-        l
-      )
-  );
-  if (possivelNome) return possivelNome.trim();
-
-  return "";
-}
-
-function extrairInfo(texto: string) {
-  const regexCNPJ = /\b\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-\s]?\d{2}\b/g;
-
-  const regexAIT = /N[º°]?\s*AIT[:\s-]*([A-Z0-9-]+)/i;
-  const regexRENAINF = /NUM[.\s]*RENAINF[:\s-]*([A-Z0-9-]+)/i;
-  const regexNumerosLongos = /\b\d{8,}\b/g;
-
-  let numeroAIT = "";
-  let numeroRENAINF = "";
-  let outrosNumeros = [];
-
-  const aitMatch = texto.match(regexAIT);
-  if (aitMatch && aitMatch[1]) numeroAIT = aitMatch[1];
-
-  const renainfMatch = texto.match(regexRENAINF);
-  if (renainfMatch && renainfMatch[1]) numeroRENAINF = renainfMatch[1];
-
-  outrosNumeros = texto.match(regexNumerosLongos) || [];
-
-  const nome = extrairNomeInteligente(texto);
-
-  const cnpjs = texto.match(regexCNPJ) || [];
-
-  return {
-    numeroAIT,
-    numeroRENAINF,
-    outrosNumeros,
-    nome,
-    cnpjs,
-  };
+interface ExtractedInfo {
+  numeroProcesso?: string;
+  nomeContribuinte?: string;
+  cnpjContribuinte?: string;
+  confianca?: number;
 }
 
 export default function HunterFiscal() {
@@ -97,6 +16,7 @@ export default function HunterFiscal() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [ocrText, setOcrText] = useState("");
   const [ocrProgress, setOcrProgress] = useState(0);
+  const [extractedInfo, setExtractedInfo] = useState<ExtractedInfo>({});
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -109,65 +29,51 @@ export default function HunterFiscal() {
     setIsProcessing(true);
 
     try {
-      if (file.type === "application/pdf") {
-        await processPdf(file);
-      } else if (file.type.startsWith("image/")) {
-        await runOcr(file);
-      } else {
-        alert("Arquivo não suportado. Envie PDF ou imagem.");
-      }
+      // Usar a nova API Python com SpaCy
+      await processWithPythonAPI(file);
     } catch (err) {
       setOcrText("Erro ao processar arquivo: " + err);
     }
     setIsProcessing(false);
   };
 
-  const processPdf = async (file: File) => {
-    const fileReader = new FileReader();
-    fileReader.onload = async function () {
-      try {
-        const typedarray = new Uint8Array(this.result as ArrayBuffer);
-        const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-        let fullText = "";
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          setOcrProgress(Math.round(((pageNum - 1) / pdf.numPages) * 100));
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2 });
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-          if (context) {
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            await page.render({ canvasContext: context, viewport }).promise;
-            const text = await runOcr(canvas);
-            fullText += `\n--- Página ${pageNum} ---\n` + text;
-          }
-        }
-        setOcrText(preprocessText(fullText));
-        setOcrProgress(100);
-      } catch (err) {
-        setOcrText("Erro ao processar PDF: " + err);
-      }
-    };
-    fileReader.readAsArrayBuffer(file);
-  };
-
-  const runOcr = async (image: File | HTMLCanvasElement) => {
+  const processWithPythonAPI = async (file: File) => {
     try {
-      const {
-        data: { text },
-      } = await Tesseract.recognize(image, "por", {
-        logger: (m) => {
-          if (m.status === "recognizing text") {
-            setOcrProgress(Math.round(m.progress * 100));
-          }
-        },
+      setOcrProgress(10);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setOcrProgress(30);
+
+      const response = await fetch("http://localhost:8000/extract-info", {
+        method: "POST",
+        body: formData,
       });
-      setOcrText((prev) => preprocessText(prev ? prev + "\n" + text : text));
-      return text;
+
+      setOcrProgress(70);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      setOcrProgress(100);
+
+      // Atualizar texto extraído
+      setOcrText(result.texto_extraido || "Texto não extraído");
+
+      // Atualizar informações extraídas
+      setExtractedInfo({
+        numeroProcesso: result.numero_processo,
+        nomeContribuinte: result.nome_contribuinte,
+        cnpjContribuinte: result.cnpj_contribuinte,
+        confianca: result.confianca,
+      });
     } catch (err) {
-      setOcrText("Erro no OCR: " + err);
-      return "";
+      console.error("Erro ao processar com API Python:", err);
+      throw new Error(`Erro ao processar arquivo: ${err}`);
     }
   };
 
@@ -176,8 +82,6 @@ export default function HunterFiscal() {
       document.getElementById("file-upload")?.click();
     }
   };
-
-  const infoExtraida = extrairInfo(ocrText);
 
   return (
     <div className="upload-full-bg">
@@ -208,7 +112,7 @@ export default function HunterFiscal() {
             disabled={isProcessing}
           >
             {isProcessing
-              ? `Reconhecendo... ${ocrProgress}%`
+              ? `Processando... ${ocrProgress}%`
               : selectedFile
               ? "ARQUIVO SELECIONADO"
               : "ESCOLHER ARQUIVO"}
@@ -218,6 +122,7 @@ export default function HunterFiscal() {
               ? `Arquivo selecionado: ${selectedFile.name}`
               : "Faça o upload do Auto de Infração ICMS em PDF ou img"}
           </p>
+
           {ocrText && (
             <div
               style={{
@@ -232,27 +137,26 @@ export default function HunterFiscal() {
             >
               <strong>Texto reconhecido:</strong>
               <pre style={{ whiteSpace: "pre-wrap" }}>{ocrText}</pre>
+
               <div style={{ marginTop: "1rem", color: "#f97316" }}>
-                <strong>Extração automática:</strong>
-                <div>Nº AIT: {infoExtraida.numeroAIT || "Não encontrado"}</div>
+                <strong>Extração com SpaCy:</strong>
                 <div>
-                  NUM. RENAINF: {infoExtraida.numeroRENAINF || "Não encontrado"}
+                  Número do Processo:{" "}
+                  {extractedInfo.numeroProcesso || "Não encontrado"}
                 </div>
                 <div>
-                  Outros números longos:{" "}
-                  {infoExtraida.outrosNumeros.length > 0
-                    ? infoExtraida.outrosNumeros.join(", ")
-                    : "Não encontrado"}
+                  Nome do Contribuinte:{" "}
+                  {extractedInfo.nomeContribuinte || "Não encontrado"}
                 </div>
                 <div>
-                  Nome do proprietário/contribuinte:{" "}
-                  {infoExtraida.nome || "Não encontrado"}
+                  CNPJ do Contribuinte:{" "}
+                  {extractedInfo.cnpjContribuinte || "Não encontrado"}
                 </div>
                 <div>
-                  CNPJ(s):{" "}
-                  {infoExtraida.cnpjs.length > 0
-                    ? infoExtraida.cnpjs.join(", ")
-                    : "Não encontrado"}
+                  Confiança da Extração:{" "}
+                  {extractedInfo.confianca
+                    ? `${(extractedInfo.confianca * 100).toFixed(1)}%`
+                    : "N/A"}
                 </div>
               </div>
             </div>
