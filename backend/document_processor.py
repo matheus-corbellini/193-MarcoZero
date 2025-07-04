@@ -1,3 +1,15 @@
+# Este arquivo foi refatorado. As implementações estão agora em submódulos:
+# - extractor.py
+# - entity_extractor.py
+# - confidence.py
+# - utils.py
+
+# Para compatibilidade temporária:
+# from .extractor import ...
+# from .entity_extractor import ...
+# from .confidence import ...
+# from .utils import ...
+
 import spacy
 import re
 import pdfplumber
@@ -6,68 +18,37 @@ from PIL import Image
 import io
 from typing import Dict, Any, Optional
 import logging
+from .extractor import TextExtractor
+from .entity_extractor import EntityExtractor
+from .confidence import calculate_confidence
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class DocumentProcessor:
-    def __init__(self):
-        """Inicializar o processador com modelo SpaCy"""
-        try:
-            # Carregar modelo português do SpaCy
-            self.nlp = spacy.load("pt_core_news_sm")
-            logger.info("Modelo SpaCy carregado com sucesso")
-        except OSError:
-            logger.warning("Modelo pt_core_news_sm não encontrado. Instalando...")
-            import subprocess
-            subprocess.run(["python", "-m", "spacy", "download", "pt_core_news_sm"])
-            self.nlp = spacy.load("pt_core_news_sm")
-        
-        # Padrões regex para extração
-        self.patterns = {
-            "numero_processo": [
-                r"PROCESSO\s*N[º°]?\s*([0-9\-\.\/]+)",
-                r"N[º°]?\s*PROCESSO[:\s]*([0-9\-\.\/]+)",
-                r"PROC\s*N[º°]?\s*([0-9\-\.\/]+)",
-                r"PROTOCOLO\s*N[º°]?\s*([0-9\-\.\/]+)",
-            ],
-            "cnpj": [
-                r"\b\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-\s]?\d{2}\b",
-                r"CNPJ[:\s]*(\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-\s]?\d{2})",
-            ],
-            "nome_contribuinte": [
-                r"CONTRIBUINTE[:\s]+([A-ZÀ-Ý'\-\s]{5,})",
-                r"PROPRIET[ÁA]RIO[:\s]+([A-ZÀ-Ý'\-\s]{5,})",
-                r"NOME[:\s]+([A-ZÀ-Ý'\-\s]{5,})",
-                r"RAZÃO\s+SOCIAL[:\s]+([A-ZÀ-Ý'\-\s]{5,})",
-            ]
+async def process_document(file) -> Dict[str, Any]:
+    """Processar documento e extrair informações usando módulos refatorados."""
+    try:
+        extractor = TextExtractor()
+        entity_extractor = EntityExtractor()
+        content = await file.read()
+        if file.content_type == "application/pdf":
+            texto = extractor.extract_from_pdf(content)
+        else:
+            texto = extractor.extract_from_image(content)
+        doc = entity_extractor.nlp(texto)
+        resultado = {
+            "texto_extraido": texto,
+            "numero_processo": entity_extractor.extract_numero_processo(texto),
+            "nome_contribuinte": entity_extractor.extract_nome_contribuinte(texto),
+            "cnpj_contribuinte": entity_extractor.extract_cnpj(texto),
+            "confianca": calculate_confidence(texto, doc)
         }
-
-    async def process_document(self, file) -> Dict[str, Any]:
-        """Processar documento e extrair informações"""
-        try:
-            # Extrair texto do documento
-            texto = await self._extract_text(file)
-            
-            # Processar com SpaCy
-            doc = self.nlp(texto)
-            
-            # Extrair informações usando regex e SpaCy
-            resultado = {
-                "texto_extraido": texto,
-                "numero_processo": self._extract_numero_processo(texto),
-                "nome_contribuinte": self._extract_nome_contribuinte(texto, doc),
-                "cnpj_contribuinte": self._extract_cnpj(texto),
-                "confianca": self._calculate_confidence(texto, doc)
-            }
-            
-            logger.info(f"Informações extraídas: {resultado}")
-            return resultado
-            
-        except Exception as e:
-            logger.error(f"Erro ao processar documento: {str(e)}")
-            raise
+        logger.info(f"Informações extraídas: {resultado}")
+        return resultado
+    except Exception as e:
+        logger.error(f"Erro ao processar documento: {str(e)}")
+        raise
 
     async def _extract_text(self, file) -> str:
         """Extrair texto de PDF ou imagem"""
