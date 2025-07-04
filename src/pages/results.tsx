@@ -24,6 +24,7 @@ export default function PdfResultsScreen() {
       <div
         style={{
           minHeight: "100vh",
+          minWidth: "100vw",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -34,7 +35,8 @@ export default function PdfResultsScreen() {
         <div>
           <h2>Nenhum dado encontrado</h2>
           <p>
-            Por favor, faça o upload de um PDF para visualizar os resultados.
+            Por favor, faça o upload de um PDF ou imagem para visualizar os
+            resultados.
           </p>
         </div>
       </div>
