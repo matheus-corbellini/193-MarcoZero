@@ -54,18 +54,7 @@ export default function PdfResultsScreen() {
           <p className="subtitle">Resultados da Análise do PDF</p>
         </div>
         {/* Back button */}
-        <button
-          className="back-button"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#ff8c00";
-            e.currentTarget.style.color = "#000000";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#ff8c00";
-          }}
-          onClick={() => window.history.back()}
-        >
+        <button className="back-button" onClick={() => window.history.back()}>
           <ArrowLeft size={16} />
           Voltar
         </button>
