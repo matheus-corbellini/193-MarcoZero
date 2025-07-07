@@ -6,6 +6,7 @@ import "../styles/uploadPage.css";
 import { legislationDB } from "../type/legislation";
 import { useNavigate } from "react-router-dom";
 import { usePdfData } from "../context/PdfDataContext";
+import { API_ROUTES } from "../api/routes";
 
 export default function HunterFiscal() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,7 +47,7 @@ export default function HunterFiscal() {
       setOcrProgress(30);
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/extract-info`,
+        `${import.meta.env.VITE_API_URL}${API_ROUTES.EXTRACT_INFO}`,
         {
           method: "POST",
           body: formData,
