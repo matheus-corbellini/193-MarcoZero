@@ -7,6 +7,7 @@ import { legislationDB } from "../type/legislation";
 import { useNavigate } from "react-router-dom";
 import { usePdfData } from "../context/PdfDataContext";
 import { API_ROUTES } from "../api/routes";
+import { ArrowLeft } from "lucide-react";
 
 export default function HunterFiscal() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -166,28 +167,18 @@ export default function HunterFiscal() {
       <div style={{ position: "absolute", top: 24, left: 24, zIndex: 20 }}>
         <button
           type="button"
-          className="back-to-login-btn"
+          className="back-button"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 8,
-            padding: "0.5rem 1rem",
+            padding: "0.75rem 1.5rem",
           }}
           onClick={() => navigate("/login")}
           aria-label="Voltar para Login"
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ArrowLeft size={16} />
+          Voltar
         </button>
       </div>
       <h1 className="title">Hunter Fiscal</h1>
