@@ -45,10 +45,13 @@ export default function HunterFiscal() {
 
       setOcrProgress(30);
 
-      const response = await fetch("http://localhost:8000/extract-info", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/extract-info`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       setOcrProgress(70);
 
