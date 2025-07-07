@@ -163,6 +163,33 @@ export default function HunterFiscal() {
 
   return (
     <div className="upload-full-bg">
+      <div style={{ position: "absolute", top: 24, left: 24, zIndex: 20 }}>
+        <button
+          type="button"
+          className="back-to-login-btn"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "0.5rem 1rem",
+          }}
+          onClick={() => navigate("/login")}
+          aria-label="Voltar para Login"
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+      </div>
       <h1 className="title">Hunter Fiscal</h1>
       <div className="upload-full-content">
         <div className="uploadSection">

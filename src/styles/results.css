@@ -352,3 +352,30 @@ body {
     justify-content: center;
   }
 }
+
+.back-to-login-btn {
+  background: none;
+  border: 2px solid #ff8c00;
+  color: #ff8c00;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 1.5rem;
+}
+
+.back-to-login-btn:hover {
+  background: #ff8c00;
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .back-to-login-btn {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
