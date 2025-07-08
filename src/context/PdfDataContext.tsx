@@ -15,6 +15,14 @@ export interface PdfData {
     penalty?: string;
     fine?: string;
     total?: string;
+    aliquota_aplicada?: string;
+    aliquota_correta?: string;
+    base_calculo_presumida?: string;
+    valor_lancado?: string;
+    valor_devido?: string;
+    juros_multa?: string;
+    erro_mva_st_dec?: string;
+    diferenca_cobrada_maior?: string;
   };
   dueDate?: string;
   status?: string;

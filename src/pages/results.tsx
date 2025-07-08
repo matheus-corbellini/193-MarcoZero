@@ -17,6 +17,7 @@ import { usePdfData } from "../context/PdfDataContext";
 
 export default function PdfResultsScreen() {
   const [showDetails, setShowDetails] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { pdfData } = usePdfData();
 
   if (!pdfData) {
@@ -86,8 +87,77 @@ export default function PdfResultsScreen() {
                 <Download size={16} />
                 Baixar Relatório
               </button>
+              <button
+                className="secondary-button"
+                onClick={() => setShowReportModal(!showReportModal)}
+              >
+                Comparativo Fiscal
+              </button>
             </div>
           </div>
+          {/* Modal de Relatório Comparativo */}
+          {showReportModal && (
+            <div
+              className="modal-overlay"
+              onClick={() => setShowReportModal(false)}
+            >
+              <div
+                className="modal-content"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2>Relatório Comparativo Fiscal</h2>
+                <ul style={{ margin: "1rem 0" }}>
+                  <li>
+                    <strong>Alíquota aplicada:</strong>{" "}
+                    {pdfData.infraction?.aliquota_aplicada ?? "N/A"}
+                  </li>
+                  <li>
+                    <strong>Alíquota correta:</strong>{" "}
+                    {pdfData.infraction?.aliquota_correta ?? "N/A"}
+                  </li>
+                  <li>
+                    <strong>Base de cálculo presumida:</strong>{" "}
+                    {pdfData.infraction?.base_calculo_presumida ?? "N/A"}
+                  </li>
+                  <li>
+                    <strong>Valor lançado:</strong>{" "}
+                    {pdfData.infraction?.valor_lancado ??
+                      pdfData.infraction?.fine ??
+                      "N/A"}
+                  </li>
+                  <li>
+                    <strong>Valor devido:</strong>{" "}
+                    {pdfData.infraction?.valor_devido ?? "N/A"}
+                  </li>
+                  <li>
+                    <strong>Diferença cobrada a maior:</strong>{" "}
+                    {pdfData.infraction?.diferenca_cobrada_maior ?? "N/A"}
+                  </li>
+                  <li>
+                    <strong>Juros e multa:</strong>{" "}
+                    {pdfData.infraction?.juros_multa ??
+                      pdfData.infraction?.fine ??
+                      "N/A"}
+                  </li>
+                  <li>
+                    <strong>Erro de MVA/ST/DEC:</strong>{" "}
+                    {pdfData.infraction?.erro_mva_st_dec ?? "N/A"}
+                  </li>
+                </ul>
+                {pdfData.validationErrors &&
+                  pdfData.validationErrors.length > 0 && (
+                    <div style={{ color: "#ef4444", marginBottom: 12 }}>
+                      <strong>Potenciais erros encontrados:</strong>
+                      <ul style={{ margin: "0.5rem 0 0 1.5rem" }}>
+                        {pdfData.validationErrors.map((err, idx) => (
+                          <li key={idx}>{err}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            </div>
+          )}
           {/* Details section */}
           {showDetails && (
             <div className="details-section show">

@@ -69,45 +69,66 @@ export default function HunterFiscal() {
       // Atualizar texto extraído
       setOcrText(result.texto_extraido || "Texto não extraído");
 
-      // Validação de CFOP, alíquota e base de cálculo
-      const errors: string[] = [];
-      if (uf && legislationDB[uf] && result) {
-        const leg = legislationDB[uf].ICMS;
-        // Tentar pegar do resultado da API, senão extrair do texto
-        const cfop = result.cfop;
-        let aliquota = result.aliquota;
-        let baseCalculo = result.base_calculo;
-
-        // Extrair alíquota do texto se não vier da API
-        if (typeof aliquota !== "number" && result.texto_extraido) {
+      // Extração de dados do texto antes das validações
+      let aliquota = result.aliquota;
+      let baseCalculo = result.base_calculo;
+      let cfop = result.cfop;
+      let multa = result.multa;
+      let juros_multa = result.juros_multa;
+      if (result.texto_extraido) {
+        // Alíquota
+        if (typeof aliquota !== "number") {
           const aliqMatch = result.texto_extraido.match(
             /Al[ií]quota[:\s]*["']?(\d{1,2}(?:[\.,]\d{1,2})?)%/i
           );
-          if (aliqMatch) {
+          if (aliqMatch)
             aliquota = parseFloat(aliqMatch[1].replace(",", ".")) / 100;
-          }
         }
-        // Extrair base de cálculo do texto se não vier da API
-        if (typeof baseCalculo !== "number" && result.texto_extraido) {
+        // Base de cálculo
+        if (typeof baseCalculo !== "number") {
           const baseMatch = result.texto_extraido.match(
             /Base[:\s]*R\$\s*([\d.,]+)/i
           );
-          if (baseMatch) {
+          if (baseMatch)
             baseCalculo = parseFloat(
-              baseMatch[1].replace(/\./g, "").replace(",", ".")
+              baseMatch[1].replace(/[.]/g, "").replace(",", ".")
             );
-          }
         }
-        // Extrair CFOP do texto se não vier da API
-        let cfopFinal = cfop;
-        if (!cfopFinal && result.texto_extraido) {
+        // CFOP
+        if (!cfop) {
           const cfopMatch =
             result.texto_extraido.match(/CFOP[:\s]*([0-9]{4})/i);
-          if (cfopMatch) {
-            cfopFinal = cfopMatch[1];
-          }
+          if (cfopMatch) cfop = cfopMatch[1];
         }
-        // Validação
+        // Multa
+        if (multa === undefined || multa === null) {
+          const multaMatch = result.texto_extraido.match(
+            /Multa[:\s]*R\$\s*([\d.,]+)/i
+          );
+          if (multaMatch)
+            multa = parseFloat(
+              multaMatch[1].replace(/[.]/g, "").replace(",", ".")
+            );
+        }
+        // Juros
+        if (juros_multa === undefined || juros_multa === null) {
+          const jurosMatch = result.texto_extraido.match(
+            /Juros[:\s]*R\$\s*([\d.,]+)/i
+          );
+          if (jurosMatch)
+            juros_multa = parseFloat(
+              jurosMatch[1].replace(/[.]/g, "").replace(",", ".")
+            );
+        }
+      }
+
+      // Validação de CFOP, alíquota e base de cálculo
+      const errors: string[] = [];
+      let valorDevido = undefined;
+      let leg = undefined;
+      if (uf && legislationDB[uf] && result) {
+        leg = legislationDB[uf].ICMS;
+        let cfopFinal = cfop;
         if (cfopFinal && !leg.cfop_validos.includes(cfopFinal)) {
           errors.push(`CFOP ${cfopFinal} não é válido para ${uf}`);
         }
@@ -126,6 +147,34 @@ export default function HunterFiscal() {
             `Base de cálculo ${baseCalculo} abaixo do mínimo (${leg.base_calculo_minima}) para ${uf}`
           );
         }
+        // Validação de MVA
+        if (result.mva && leg?.mva && result.mva !== leg.mva) {
+          errors.push(`MVA ${result.mva} difere do previsto (${leg.mva})`);
+        }
+        // Validação de Substituição Tributária
+        if (result.substituicao_tributaria && !leg?.permite_st) {
+          errors.push("Substituição tributária não permitida para este caso.");
+        }
+        // Juros e multa desproporcionais
+        if (juros_multa && multa && Number(juros_multa) > 0.2 * Number(multa)) {
+          errors.push("Juros e multa considerados desproporcionais.");
+        }
+        // Ausência de notificação via DEC
+        if (
+          result.texto_extraido &&
+          result.texto_extraido.toLowerCase().includes("não notificado via dec")
+        ) {
+          errors.push("Ausência de notificação via DEC detectada.");
+        }
+        // Comparativo valor devido
+        if (typeof baseCalculo === "number" && leg?.aliquota) {
+          valorDevido = baseCalculo * leg.aliquota;
+        }
+      }
+
+      let diferencaCobradaMaior = undefined;
+      if (multa && valorDevido && Number(multa) > valorDevido) {
+        diferencaCobradaMaior = Number(multa) - valorDevido;
       }
 
       // Salvar no contexto global
@@ -142,8 +191,50 @@ export default function HunterFiscal() {
           description: result.descricao_infracao,
           article: result.fundamentacao_legal,
           penalty: result.penalidade,
-          fine: result.multa,
+          fine: multa,
           total: result.total,
+          aliquota_aplicada:
+            typeof aliquota === "number"
+              ? (aliquota * 100).toFixed(2) + "%"
+              : undefined,
+          aliquota_correta: leg?.aliquota
+            ? (leg.aliquota * 100).toFixed(2) + "%"
+            : undefined,
+          base_calculo_presumida:
+            typeof baseCalculo === "number"
+              ? "R$ " +
+                baseCalculo.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })
+              : undefined,
+          valor_lancado: multa
+            ? "R$ " +
+              Number(multa).toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })
+            : undefined,
+          valor_devido: valorDevido
+            ? "R$ " +
+              valorDevido.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+            : undefined,
+          juros_multa: juros_multa
+            ? "R$ " +
+              Number(juros_multa).toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })
+            : undefined,
+          erro_mva_st_dec: errors.find(
+            (e) =>
+              e.toLowerCase().includes("mva") ||
+              e.toLowerCase().includes("substituição tributária") ||
+              e.toLowerCase().includes("dec")
+          ),
+          diferenca_cobrada_maior: diferencaCobradaMaior
+            ? "R$ " +
+              diferencaCobradaMaior.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })
+            : undefined,
         },
         dueDate: result.data_vencimento,
         status: result.status,
