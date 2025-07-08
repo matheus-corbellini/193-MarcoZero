@@ -128,7 +128,7 @@ export default function HunterFiscal() {
       let leg = undefined;
       if (uf && legislationDB[uf] && result) {
         leg = legislationDB[uf].ICMS;
-        let cfopFinal = cfop;
+        const cfopFinal = cfop;
         if (cfopFinal && !leg.cfop_validos.includes(cfopFinal)) {
           errors.push(`CFOP ${cfopFinal} não é válido para ${uf}`);
         }
