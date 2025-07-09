@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/uploadPage.css";
 import { legislationDB } from "../type/legislation";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ export default function HunterFiscal() {
   const [selectedUF, setSelectedUF] = useState<string>("");
   const navigate = useNavigate();
   const { setPdfData } = usePdfData();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -335,6 +336,7 @@ export default function HunterFiscal() {
             className="fileInput"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileSelect}
+            ref={fileInputRef}
           />
           <button
             className="uploadButton"
@@ -347,16 +349,32 @@ export default function HunterFiscal() {
               ? "ARQUIVO SELECIONADO"
               : "ESCOLHER ARQUIVO"}
           </button>
-          {/* Botão Ir para Resultados */}
+          {/* Botão Ir para Resultados e mensagem de sucesso */}
           {ocrText && !isProcessing && (
             <div style={{ marginTop: 16, textAlign: "center" }}>
-              <button
-                type="button"
-                className="goToResultsButton"
-                onClick={() => navigate("/results")}
-              >
-                Ir para Resultados
-              </button>
+              <div className="actionButtonsContainer">
+                <button
+                  type="button"
+                  className="goToResultsButton"
+                  onClick={() => navigate("/results")}
+                >
+                  Ir para Resultados
+                </button>
+                <button
+                  type="button"
+                  className="removeFileButton"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setOcrText("");
+                    setOcrProgress(0);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }}
+                >
+                  Remover arquivo
+                </button>
+              </div>
               <div
                 style={{
                   margin: "8px auto 0 auto",
