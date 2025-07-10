@@ -38,6 +38,13 @@ class EntityExtractor:
                     return nome
         return self._extract_name_with_spacy(doc)
 
+    def extract_numero_auto_infracao(self, texto: str) -> Optional[str]:
+        for pattern in self.patterns["numero_auto_infracao"]:
+            match = re.search(pattern, texto, re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        return None
+
     def _extract_name_with_spacy(self, doc) -> Optional[str]:
         for ent in doc.ents:
             if ent.label_ == "PERSON" and len(ent.text.split()) >= 2:

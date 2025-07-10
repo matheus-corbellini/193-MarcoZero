@@ -178,11 +178,34 @@ export default function HunterFiscal() {
         diferencaCobradaMaior = Number(multa) - valorDevido;
       }
 
+      // Após receber o result
+      let fundamentacaoLegal =
+        result.fundamentacao_legal || result.article || "";
+      if (!fundamentacaoLegal && result.texto_extraido) {
+        const match = result.texto_extraido.match(
+          /Fundamenta[çc][ãa]o Legal:([^\n]+)/i
+        );
+        if (match) {
+          fundamentacaoLegal = match[1].trim();
+        }
+      }
+
       // Salvar no contexto global
       setPdfData({
         fileName: file.name,
         extractedDate: new Date().toLocaleDateString(),
-        autoNumber: result.numero_processo,
+        // Normalização para garantir que o número do auto venha de qualquer campo possível
+        numero_auto_infracao:
+          result.numero_auto_infracao ||
+          result.numeroAutoInfracao ||
+          result.autoNumber ||
+          result.numero_processo ||
+          null,
+        autoNumber:
+          result.numero_processo ||
+          result.numero_auto_infracao ||
+          result.numeroAutoInfracao ||
+          null,
         taxpayer: {
           name: result.nome_contribuinte,
           cnpj: result.cnpj_contribuinte,
@@ -190,7 +213,7 @@ export default function HunterFiscal() {
         },
         infraction: {
           description: result.descricao_infracao,
-          article: result.fundamentacao_legal,
+          article: fundamentacaoLegal,
           penalty: result.penalidade,
           fine: multa,
           total: result.total,

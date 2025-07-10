@@ -4,6 +4,7 @@ export interface PdfData {
   fileName?: string;
   extractedDate?: string;
   autoNumber?: string;
+  numero_auto_infracao?: string;
   taxpayer?: {
     name?: string;
     cnpj?: string;

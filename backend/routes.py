@@ -7,6 +7,7 @@ router = APIRouter()
 
 class ExtractionResult(BaseModel):
     numero_processo: Optional[str] = None
+    numero_auto_infracao: Optional[str] = None
     nome_contribuinte: Optional[str] = None
     cnpj_contribuinte: Optional[str] = None
     texto_extraido: str
@@ -28,6 +29,7 @@ async def extract_document_info(file: UploadFile = File(...)):
         result = await process_document(file)
         return ExtractionResult(
             numero_processo=result.get("numero_processo"),
+            numero_auto_infracao=result.get("numero_auto_infracao"),
             nome_contribuinte=result.get("nome_contribuinte"),
             cnpj_contribuinte=result.get("cnpj_contribuinte"),
             texto_extraido=result.get("texto_extraido", ""),

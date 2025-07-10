@@ -37,9 +37,11 @@ async def process_document(file) -> Dict[str, Any]:
         else:
             texto = extractor.extract_from_image(content)
         doc = entity_extractor.nlp(texto)
+        numero_auto = entity_extractor.extract_numero_auto_infracao(texto)
         resultado = {
             "texto_extraido": texto,
             "numero_processo": entity_extractor.extract_numero_processo(texto),
+            "numero_auto_infracao": numero_auto,
             "nome_contribuinte": entity_extractor.extract_nome_contribuinte(texto),
             "cnpj_contribuinte": entity_extractor.extract_cnpj(texto),
             "confianca": calculate_confidence(texto, doc)

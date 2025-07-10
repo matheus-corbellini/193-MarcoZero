@@ -13,12 +13,17 @@ import {
 } from "lucide-react";
 
 import "../styles/results.css";
+import "../styles/results/reportModal.css";
 import { usePdfData } from "../context/PdfDataContext";
 
 export default function PdfResultsScreen() {
   const [showDetails, setShowDetails] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const { pdfData } = usePdfData();
+
+  console.log("pdfData:", pdfData);
+  console.log("pdfData.infraction:", pdfData?.infraction);
+  console.log("pdfData.infraction.article:", pdfData?.infraction?.article);
 
   if (!pdfData) {
     return (
@@ -43,6 +48,145 @@ export default function PdfResultsScreen() {
       </div>
     );
   }
+
+  // Dicionário de jurisprudência relevante
+  const jurisprudenciaMap: Record<
+    string,
+    Array<{ tribunal: string; sumula: string; ementa: string }>
+  > = {
+    "Art. 155, §2º, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 323",
+        ementa:
+          "É inadmissível a apreensão de mercadorias como meio coercitivo para pagamento de tributos.",
+      },
+      {
+        tribunal: "STF",
+        sumula: "Súmula Vinculante 31",
+        ementa:
+          "É inconstitucional a exigência de depósito prévio como requisito de admissibilidade de ação judicial na qual se pretenda discutir a exigibilidade de crédito tributário.",
+      },
+    ],
+    "Art. 97, II do CTN": [
+      {
+        tribunal: "STJ",
+        sumula: "Súmula 160",
+        ementa:
+          "É nula a decisão que não examina todos os argumentos da defesa.",
+      },
+      {
+        tribunal: "STF",
+        sumula: "Súmula 544",
+        ementa:
+          "Isenção concedida, por lei municipal, de tributo da competência da União ou de Estado, não é eficaz antes da respectiva autorização.",
+      },
+    ],
+    "Art. 144 do CTN": [
+      {
+        tribunal: "STJ",
+        sumula: "Súmula 436",
+        ementa:
+          "A entrega de declaração pelo contribuinte reconhecendo o débito fiscal constitui o crédito tributário, dispensada qualquer outra providência por parte do Fisco.",
+      },
+    ],
+    "Art. 150, §7º, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 555",
+        ementa:
+          "É legítima a cobrança do ICMS sobre o valor da tarifa de energia elétrica.",
+      },
+    ],
+    "Art. 146, III, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 574",
+        ementa:
+          "Não é legítima a cobrança de tributo sem lei que o estabeleça.",
+      },
+    ],
+    "Art. 112 do CTN": [
+      {
+        tribunal: "STJ",
+        sumula: "Súmula 555",
+        ementa:
+          "Na dúvida quanto à interpretação de legislação tributária, adota-se a interpretação mais favorável ao contribuinte.",
+      },
+    ],
+    "Art. 150, VI, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 724",
+        ementa:
+          "Não é isenta de ICMS a exportação de mercadorias para o exterior.",
+      },
+    ],
+    "Art. 3º, RICMS/RJ": [
+      {
+        tribunal: "TJRJ",
+        sumula: "Súmula 183",
+        ementa:
+          "O ICMS não incide sobre operações de transferência de mercadorias entre estabelecimentos do mesmo contribuinte.",
+      },
+    ],
+    "Art. 23, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 347",
+        ementa:
+          "O Tribunal de Contas, no exercício de suas atribuições, pode apreciar a constitucionalidade das leis e dos atos do Poder Público.",
+      },
+    ],
+    "Art. 150, I, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 654",
+        ementa:
+          "A cobrança de tributo em virtude de lei inconstitucional é indevida.",
+      },
+    ],
+    "Art. 5º, XXXV, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 347",
+        ementa:
+          "O Tribunal de Contas, no exercício de suas atribuições, pode apreciar a constitucionalidade das leis e dos atos do Poder Público.",
+      },
+    ],
+    "Art. 150, §6º, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 544",
+        ementa:
+          "Isenção concedida, por lei municipal, de tributo da competência da União ou de Estado, não é eficaz antes da respectiva autorização.",
+      },
+    ],
+    "Art. 97, VI do CTN": [
+      {
+        tribunal: "STJ",
+        sumula: "Súmula 555",
+        ementa:
+          "Na dúvida quanto à interpretação de legislação tributária, adota-se a interpretação mais favorável ao contribuinte.",
+      },
+    ],
+    "Art. 150, §4º, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 654",
+        ementa:
+          "A cobrança de tributo em virtude de lei inconstitucional é indevida.",
+      },
+    ],
+    "Art. 23, §1º, CF/88": [
+      {
+        tribunal: "STF",
+        sumula: "Súmula 347",
+        ementa:
+          "O Tribunal de Contas, no exercício de suas atribuições, pode apreciar a constitucionalidade das leis e dos atos do Poder Público.",
+      },
+    ],
+  };
 
   return (
     <div className="container">
@@ -102,53 +246,108 @@ export default function PdfResultsScreen() {
               onClick={() => setShowReportModal(false)}
             >
               <div
-                className="modal-content"
+                className="modal-content fiscal-report-modal expanded"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2>Relatório Comparativo Fiscal</h2>
-                <ul style={{ margin: "1rem 0" }}>
-                  <li>
-                    <strong>Alíquota aplicada:</strong>{" "}
+                <h2 className="report-title">RELATÓRIO</h2>
+                <div className="report-section">
+                  <div className="report-label">Auto de Infração:</div>
+                  <div className="report-value mono">
+                    {pdfData.numero_auto_infracao ??
+                      pdfData.autoNumber ??
+                      "N/A"}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Alíquota aplicada:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.aliquota_aplicada ?? "N/A"}
-                  </li>
-                  <li>
-                    <strong>Alíquota correta:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Alíquota correta:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.aliquota_correta ?? "N/A"}
-                  </li>
-                  <li>
-                    <strong>Base de cálculo presumida:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Base de cálculo presumida:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.base_calculo_presumida ?? "N/A"}
-                  </li>
-                  <li>
-                    <strong>Valor lançado:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Valor lançado:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.valor_lancado ??
                       pdfData.infraction?.fine ??
                       "N/A"}
-                  </li>
-                  <li>
-                    <strong>Valor devido:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Valor devido:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.valor_devido ?? "N/A"}
-                  </li>
-                  <li>
-                    <strong>Diferença cobrada a maior:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Diferença cobrada a maior:</div>
+                  <div className="report-value warning">
+                    <AlertTriangle
+                      size={18}
+                      style={{ verticalAlign: "middle", marginRight: 6 }}
+                    />
                     {pdfData.infraction?.diferenca_cobrada_maior ?? "N/A"}
-                  </li>
-                  <li>
-                    <strong>Juros e multa:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Juros e multa:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.juros_multa ??
                       pdfData.infraction?.fine ??
                       "N/A"}
-                  </li>
-                  <li>
-                    <strong>Erro de MVA/ST/DEC:</strong>{" "}
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">Erro de MVA/ST/DEC:</div>
+                  <div className="report-value">
                     {pdfData.infraction?.erro_mva_st_dec ?? "N/A"}
-                  </li>
-                </ul>
+                  </div>
+                </div>
+                <div className="report-section">
+                  <div className="report-label">
+                    Dispositivos Legais Infringidos:
+                  </div>
+                  <ul className="report-list">
+                    {pdfData.infraction?.article?.split(";").map((art, idx) => (
+                      <li key={idx}>
+                        {art.trim()}
+                        {jurisprudenciaMap[art.trim()] && (
+                          <ul className="juris-list">
+                            {jurisprudenciaMap[art.trim()].map((jur, jdx) => (
+                              <li key={jdx}>
+                                <strong>
+                                  {jur.tribunal} - {jur.sumula}:
+                                </strong>{" "}
+                                {jur.ementa}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 {pdfData.validationErrors &&
                   pdfData.validationErrors.length > 0 && (
-                    <div style={{ color: "#ef4444", marginBottom: 12 }}>
-                      <strong>Potenciais erros encontrados:</strong>
-                      <ul style={{ margin: "0.5rem 0 0 1.5rem" }}>
+                    <div className="report-section">
+                      <div
+                        className="report-label"
+                        style={{ color: "#ef4444" }}
+                      >
+                        <strong>Potenciais erros encontrados:</strong>
+                      </div>
+                      <ul className="report-list">
                         {pdfData.validationErrors.map((err, idx) => (
                           <li key={idx}>{err}</li>
                         ))}

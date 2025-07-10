@@ -1,0 +1,112 @@
+.fiscal-report-modal {
+  background: #18181b;
+  color: #fff;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fiscal-report-modal.expanded {
+  width: 98vw;
+  max-width: 1400px;
+  min-width: 320px;
+  /* Removido overflow-y: auto para que o scroll seja do body */
+  height: auto;
+  max-height: none;
+  padding: 2.5rem 3rem;
+  box-sizing: border-box;
+  margin: 3vh auto;
+}
+
+.report-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.report-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.report-label {
+  font-size: 1rem;
+  color: #bdbdbd;
+  font-weight: 500;
+}
+
+.report-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 0.2rem;
+}
+
+.report-value.mono {
+  font-family: "Fira Mono", "Consolas", monospace;
+  font-size: 1.05rem;
+}
+
+.report-value.warning {
+  color: #ffb300;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.report-list {
+  margin: 0.5rem 0 0 1.2rem;
+  padding: 0;
+  color: #fff;
+  font-size: 1rem;
+  list-style: disc;
+}
+
+.juris-list {
+  margin: 0.3rem 0 0 1.5rem;
+  padding: 0;
+  color: #ffe082;
+  font-size: 0.98rem;
+  list-style: circle;
+}
+
+.juris-list li {
+  margin-bottom: 0.2rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .fiscal-report-modal {
+    padding: 1rem;
+    max-width: 95vw;
+  }
+  .report-title {
+    font-size: 1.1rem;
+  }
+  .fiscal-report-modal.expanded {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .fiscal-report-modal.expanded {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 1rem;
+    margin: 0;
+  }
+}
