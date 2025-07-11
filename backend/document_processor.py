@@ -1,3 +1,4 @@
+print("[LOG] Import document_processor.py OK")
 # Este arquivo foi refatorado. As implementações estão agora em submódulos:
 # - extractor.py
 # - entity_extractor.py

@@ -15,7 +15,7 @@ class ExtractionResult(BaseModel):
 
 @router.post("/extract-info", response_model=ExtractionResult)
 async def extract_document_info(file: UploadFile = File(...)):
-    print("[LOG] Início do endpoint /extract-info")
+    print("[LOG] Chegou no endpoint /extract-info (antes de tudo)")
     """
     Extrai informações de documentos (PDF ou imagem)
     """
@@ -26,6 +26,8 @@ async def extract_document_info(file: UploadFile = File(...)):
                 status_code=400, 
                 detail="Tipo de arquivo não suportado. Use PDF ou imagem."
             )
+        content = await file.read()
+        print("[LOG] Leu o arquivo no endpoint /extract-info")
         # Processar documento
         result = await process_document(file)
         return ExtractionResult(
