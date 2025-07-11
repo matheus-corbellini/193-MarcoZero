@@ -15,6 +15,7 @@ class ExtractionResult(BaseModel):
 
 @router.post("/extract-info", response_model=ExtractionResult)
 async def extract_document_info(file: UploadFile = File(...)):
+    print("[LOG] Início do endpoint /extract-info")
     """
     Extrai informações de documentos (PDF ou imagem)
     """

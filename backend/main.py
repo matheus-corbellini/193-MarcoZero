@@ -4,6 +4,8 @@ from .routes import router
 
 app = FastAPI(title="Hunter Fiscal API", version="1.0.0")
 
+print("[LOG] Backend iniciado com sucesso")
+
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
