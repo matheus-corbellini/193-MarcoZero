@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useState } from "react";
 
 export interface PdfData {
   fileName?: string;
@@ -38,7 +38,7 @@ interface PdfDataContextType {
 
 const PdfDataContext = createContext<PdfDataContextType | undefined>(undefined);
 
-export const PdfDataProvider: React.FC<{ children: React.ReactNode }> = ({
+const PdfDataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [pdfData, setPdfData] = useState<PdfData | null>(null);
@@ -49,10 +49,4 @@ export const PdfDataProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export function usePdfData() {
-  const context = useContext(PdfDataContext);
-  if (!context) {
-    throw new Error("usePdfData deve ser usado dentro de PdfDataProvider");
-  }
-  return context;
-}
+export { PdfDataContext, PdfDataProvider };

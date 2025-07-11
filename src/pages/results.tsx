@@ -14,7 +14,7 @@ import {
 
 import "../styles/results.css";
 import "../styles/results/reportModal.css";
-import { usePdfData } from "../context/PdfDataContext";
+import { usePdfData } from "../hooks/usePdfData";
 
 export default function PdfResultsScreen() {
   const [showDetails, setShowDetails] = useState(false);

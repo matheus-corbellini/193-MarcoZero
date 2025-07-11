@@ -4,21 +4,37 @@ import type React from "react";
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import "../../styles/authStyles.css";
-
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import Modal from "../../components/Modal";
 interface LoginScreenProps {
   onSwitchToRegister: () => void;
 }
 
 export default function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Login: ", formData);
+    try {
+      await login(formData.email, formData.password);
+      setModalTitle("Login realizado!");
+      setModalMessage("Você entrou com sucesso.");
+      setModalOpen(true);
+    } catch (error) {
+      setModalTitle("Erro ao fazer login");
+      setModalMessage((error as Error).message);
+      setModalOpen(true);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,6 +133,16 @@ export default function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
           <p>Hunter Fiscal - Análise Inteligente de Documentos Fiscais</p>
         </div>
       </div>
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalTitle === "Login realizado!") navigate("/upload");
+        }}
+        title={modalTitle}
+      >
+        {modalMessage}
+      </Modal>
     </div>
   );
 }

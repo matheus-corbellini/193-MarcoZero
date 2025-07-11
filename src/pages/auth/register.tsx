@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import "../../styles/authStyles.css";
+import { useAuth } from "../../hooks/useAuth";
+import Modal from "../../components/Modal";
 
 interface RegisterScreenProps {
   onSwitchToLogin: () => void;
@@ -11,6 +13,7 @@ interface RegisterScreenProps {
 export default function RegisterScreen({
   onSwitchToLogin,
 }: RegisterScreenProps) {
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,14 +23,28 @@ export default function RegisterScreen({
     confirmPassword: "",
     acceptTerms: false,
   });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("As senhas não coincidem");
+      setModalTitle("Erro ao registrar");
+      setModalMessage("As senhas não coincidem");
+      setModalOpen(true);
       return;
     }
-    console.log("Register: ", formData);
+    try {
+      await register(formData.name, formData.email, formData.password);
+      setModalTitle("Conta criada!");
+      setModalMessage("Seu registro foi concluído com sucesso.");
+      setModalOpen(true);
+    } catch (err) {
+      setModalTitle("Erro ao registrar");
+      setModalMessage((err as Error).message);
+      setModalOpen(true);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,6 +200,16 @@ export default function RegisterScreen({
           <p>Hunter Fiscal - Análise Inteligente de Documentos Fiscais</p>
         </div>
       </div>
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalTitle === "Conta criada!") onSwitchToLogin();
+        }}
+        title={modalTitle}
+      >
+        {modalMessage}
+      </Modal>
     </div>
   );
 }

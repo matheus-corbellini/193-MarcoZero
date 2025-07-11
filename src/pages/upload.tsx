@@ -5,7 +5,7 @@ import { useState, useRef } from "react";
 import "../styles/uploadPage.css";
 import { legislationDB } from "../type/legislation";
 import { useNavigate } from "react-router-dom";
-import { usePdfData } from "../context/PdfDataContext";
+import { usePdfData } from "../hooks/usePdfData";
 import { API_ROUTES } from "../api/routes";
 import { ArrowLeft } from "lucide-react";
 
