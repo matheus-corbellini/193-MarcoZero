@@ -33,6 +33,10 @@ async def process_document(file) -> Dict[str, Any]:
         extractor = TextExtractor()
         entity_extractor = EntityExtractor()
         content = await file.read()
+        print(f"[LOG] Tamanho do arquivo recebido: {len(content)} bytes")
+        with open("/tmp/arquivo_recebido.pdf", "wb") as f:
+            f.write(content)
+        print("[LOG] Arquivo salvo em /tmp/arquivo_recebido.pdf")
         print(f"[LOG] Tipo do arquivo recebido: {file.content_type}")
         if file.content_type == "application/pdf":
             try:
