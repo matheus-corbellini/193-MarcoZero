@@ -1,69 +1,86 @@
-# React + TypeScript + Vite
+# MarcoZERO - Sistema de Extração de Dados Fiscais
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Visão Geral
 
-Currently, two official plugins are available:
+Este projeto é composto por um frontend em React + TypeScript (Vite) e um backend em Python (FastAPI + SpaCy) para extração inteligente de informações de documentos fiscais (PDFs e imagens). O sistema utiliza OCR (Tesseract) e NLP (SpaCy) para identificar dados como número do processo, nome do contribuinte e CNPJ.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Pré-requisitos
 
-## Expanding the ESLint configuration
+- Node.js 18+
+- Python 3.8+
+- Tesseract OCR
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Instalação e Configuração
 
-```js
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+### 1. Backend Python
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Instale as dependências:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- Baixe o modelo SpaCy:
+  ```bash
+  python -m spacy download pt_core_news_sm
+  ```
+- (Opcional) Execute o script de setup:
+  ```bash
+  python setup_backend.py
+  ```
+- Instale o Tesseract OCR:
+  - Windows: Baixe de https://github.com/UB-Mannheim/tesseract/wiki e adicione ao PATH
+  - Linux: `sudo apt-get install tesseract-ocr tesseract-ocr-por`
+  - macOS: `brew install tesseract tesseract-lang`
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+### 2. Frontend React
+
+- Instale as dependências:
+  ```bash
+  npm install
+  ```
+
+## Como Rodar
+
+### Backend
+
+```bash
+cd backend
+python main.py
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O backend estará disponível em: http://localhost:8000
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+### Frontend
 
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm run dev
 ```
+
+O frontend estará disponível em: http://localhost:5173
+
+## Estrutura do Projeto
+
+- `src/` - Código fonte do frontend
+  - `components/` - Componentes React reutilizáveis
+  - `context/` - Contextos globais (ex: AuthContext, PdfDataContext)
+  - `hooks/` - Hooks customizados (ex: useAuth, usePdfData)
+  - `pages/` - Páginas principais (login, register, upload, results)
+  - `styles/` - CSS modularizado por componente/página
+  - `api/` - Rotas de integração frontend-backend
+  - `type/` - Tipagens TypeScript
+- `backend/` - Código fonte do backend Python
+  - `main.py` - Inicialização da API FastAPI
+  - `routes.py` - Rotas da API
+  - `entity_extractor.py`, `extractor.py` - Lógica de extração
+  - `confidence.py` - Cálculo de confiança
+
+## Como Contribuir
+
+1. Fork este repositório
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
+
+## Licença
+
+MIT
