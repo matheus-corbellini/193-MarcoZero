@@ -27,18 +27,12 @@ from .confidence import calculate_confidence
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def process_document(file) -> Dict[str, Any]:
+async def process_document(content, content_type) -> Dict[str, Any]:
     """Processar documento e extrair informações usando módulos refatorados."""
     try:
         extractor = TextExtractor()
         entity_extractor = EntityExtractor()
-        content = await file.read()
-        print(f"[LOG] Tamanho do arquivo recebido: {len(content)} bytes")
-        with open("/tmp/arquivo_recebido.pdf", "wb") as f:
-            f.write(content)
-        print("[LOG] Arquivo salvo em /tmp/arquivo_recebido.pdf")
-        print(f"[LOG] Tipo do arquivo recebido: {file.content_type}")
-        if file.content_type == "application/pdf":
+        if content_type == "application/pdf":
             try:
                 texto = extractor.extract_from_pdf(content)
             except Exception as e:

@@ -27,9 +27,13 @@ async def extract_document_info(file: UploadFile = File(...)):
                 detail="Tipo de arquivo não suportado. Use PDF ou imagem."
             )
         content = await file.read()
-        print("[LOG] Leu o arquivo no endpoint /extract-info")
-        # Processar documento
-        result = await process_document(file)
+        print(f"[LOG] Tamanho do arquivo recebido: {len(content)} bytes")
+        with open("/tmp/arquivo_recebido.pdf", "wb") as f:
+            f.write(content)
+        print("[LOG] Arquivo salvo em /tmp/arquivo_recebido.pdf")
+        print(f"[LOG] Tipo do arquivo recebido: {file.content_type}")
+        # Passa o content (bytes) para o processador
+        result = await process_document(content, file.content_type)
         return ExtractionResult(
             numero_processo=result.get("numero_processo"),
             numero_auto_infracao=result.get("numero_auto_infracao"),
