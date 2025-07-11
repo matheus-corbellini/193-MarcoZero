@@ -9,10 +9,7 @@ print("[LOG] Backend iniciado com sucesso")
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # desenvolvimento local
-        "https://193-marcozero.netlify.app"  # produção Netlify
-    ],
+    allow_origins=["*"],  # Liberado para qualquer origem (apenas para teste)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
