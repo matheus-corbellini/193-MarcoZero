@@ -7,7 +7,10 @@ app = FastAPI(title="Hunter Fiscal API", version="1.0.0")
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Adicione seus domínios
+    allow_origins=[
+        "http://localhost:5173",  # desenvolvimento local
+        "https://193-marcozero.netlify.app"  # produção Netlify
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
