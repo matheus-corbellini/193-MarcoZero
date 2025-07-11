@@ -32,10 +32,19 @@ async def process_document(file) -> Dict[str, Any]:
         extractor = TextExtractor()
         entity_extractor = EntityExtractor()
         content = await file.read()
+        print(f"[LOG] Tipo do arquivo recebido: {file.content_type}")
         if file.content_type == "application/pdf":
-            texto = extractor.extract_from_pdf(content)
+            try:
+                texto = extractor.extract_from_pdf(content)
+            except Exception as e:
+                print(f"[LOG] Erro ao extrair texto do PDF: {e}")
+                raise
         else:
-            texto = extractor.extract_from_image(content)
+            try:
+                texto = extractor.extract_from_image(content)
+            except Exception as e:
+                print(f"[LOG] Erro ao extrair texto da imagem (Tesseract?): {e}")
+                raise
         doc = entity_extractor.nlp(texto)
         numero_auto = entity_extractor.extract_numero_auto_infracao(texto)
         resultado = {
@@ -46,10 +55,10 @@ async def process_document(file) -> Dict[str, Any]:
             "cnpj_contribuinte": entity_extractor.extract_cnpj(texto),
             "confianca": calculate_confidence(texto, doc)
         }
-        logger.info(f"Informações extraídas: {resultado}")
+        print(f"[LOG] Informações extraídas: {resultado}")
         return resultado
     except Exception as e:
-        logger.error(f"Erro ao processar documento: {str(e)}")
+        print(f"[LOG] Erro detalhado no processamento do documento: {e}")
         raise
 
     async def _extract_text(self, file) -> str:
