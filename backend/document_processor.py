@@ -19,9 +19,9 @@ from PIL import Image
 import io
 from typing import Dict, Any, Optional
 import logging
-from .extractor import TextExtractor
-from .entity_extractor import EntityExtractor
-from .confidence import calculate_confidence
+from extractor import TextExtractor
+from entity_extractor import EntityExtractor
+from confidence import calculate_confidence
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)

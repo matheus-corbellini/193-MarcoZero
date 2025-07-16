@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from .document_processor import process_document
+from document_processor import process_document
 
 router = APIRouter()
 
@@ -28,9 +28,6 @@ async def extract_document_info(file: UploadFile = File(...)):
             )
         content = await file.read()
         print(f"[LOG] Tamanho do arquivo recebido: {len(content)} bytes")
-        with open("/tmp/arquivo_recebido.pdf", "wb") as f:
-            f.write(content)
-        print("[LOG] Arquivo salvo em /tmp/arquivo_recebido.pdf")
         print(f"[LOG] Tipo do arquivo recebido: {file.content_type}")
         # Passa o content (bytes) para o processador
         result = await process_document(content, file.content_type)

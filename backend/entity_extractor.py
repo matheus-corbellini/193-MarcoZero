@@ -2,7 +2,7 @@ import re
 import spacy
 import logging
 from typing import Optional
-from .regex_patterns import PATTERNS
+from regex_patterns import PATTERNS
 
 logger = logging.getLogger(__name__)
 
