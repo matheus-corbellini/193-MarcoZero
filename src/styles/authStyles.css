@@ -271,14 +271,6 @@ body {
   color: #e07600;
 }
 
-/* Footer */
-.auth-footer {
-  text-align: center;
-  margin-top: 2rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
 /* Responsividade */
 @media (max-width: 640px) {
   .auth-content {

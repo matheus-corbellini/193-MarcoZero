@@ -7,6 +7,7 @@ import "../../styles/authStyles.css";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import Modal from "../../components/Modal";
+import { Footer } from "borderless/dist/Footer.js";
 interface LoginScreenProps {
   onSwitchToRegister: () => void;
 }
@@ -129,9 +130,12 @@ export default function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
           </form>
         </div>
 
-        <div className="auth-footer">
-          <p>Hunter Fiscal - Análise Inteligente de Documentos Fiscais</p>
-        </div>
+        <Footer
+          theme="dark"
+          useGradient={false}
+          backgroundColor="transparent"
+          logoVariant="light"
+        />
       </div>
       <Modal
         isOpen={modalOpen}

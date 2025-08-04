@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import "../../styles/authStyles.css";
 import { useAuth } from "../../hooks/useAuth";
 import Modal from "../../components/Modal";
+import { Footer } from "borderless/dist/Footer.js";
 
 interface RegisterScreenProps {
   onSwitchToLogin: () => void;
@@ -196,9 +197,12 @@ export default function RegisterScreen({
           </form>
         </div>
 
-        <div className="auth-footer">
-          <p>Hunter Fiscal - Análise Inteligente de Documentos Fiscais</p>
-        </div>
+        <Footer
+          theme="dark"
+          useGradient={false}
+          backgroundColor="transparent"
+          logoVariant="light"
+        />
       </div>
       <Modal
         isOpen={modalOpen}
